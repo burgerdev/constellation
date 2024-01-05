@@ -84,6 +84,7 @@ func TestUpgrade(t *testing.T) {
 	log.Println("Fetching measurements for new image.")
 	cmd := exec.CommandContext(context.Background(), cli, "config", "fetch-measurements", "--insecure", "--debug")
 	stdout, stderr, err := runCommandWithSeparateOutputs(cmd)
+	// TODO: more duplicate printing
 	require.NoError(err, "Stdout: %s\nStderr: %s", string(stdout), string(stderr))
 	log.Println(string(stdout))
 
@@ -306,6 +307,7 @@ func writeUpgradeConfig(require *require.Assertions, image string, kubernetes st
 func runUpgradeCheck(require *require.Assertions, cli, targetKubernetes string) {
 	cmd := exec.CommandContext(context.Background(), cli, "upgrade", "check", "--debug")
 	stdout, stderr, err := runCommandWithSeparateOutputs(cmd)
+	// TODO: out/err are duplicated here, and it's dubious whether they'd be even useful.
 	require.NoError(err, "Stdout: %s\nStderr: %s", string(stdout), string(stderr))
 
 	require.Contains(string(stdout), "The following updates are available with this CLI:")
@@ -313,6 +315,7 @@ func runUpgradeCheck(require *require.Assertions, cli, targetKubernetes string) 
 	log.Printf("targetKubernetes: %s\n", targetKubernetes)
 
 	if targetKubernetes == "" {
+		// TODO: wtf is this log supposed to tell me?
 		log.Printf("true\n")
 		require.True(containsAny(string(stdout), versions.SupportedK8sVersions()))
 	} else {
@@ -336,6 +339,7 @@ func containsAny(text string, substrs []string) bool {
 }
 
 func runUpgradeApply(require *require.Assertions, cli string) {
+	// TODO: remove tf-log flag
 	tfLogFlag := ""
 	cmd := exec.CommandContext(context.Background(), cli, "--help")
 	stdout, stderr, err := runCommandWithSeparateOutputs(cmd)
@@ -348,6 +352,7 @@ func runUpgradeApply(require *require.Assertions, cli string) {
 	stdout, stderr, err = runCommandWithSeparateOutputs(cmd)
 	require.NoError(err, "Stdout: %s\nStderr: %s", string(stdout), string(stderr))
 	require.NoError(containsUnexepectedMsg(string(stdout)))
+	// TODO: all the logging below is duplicated unnecessarily.
 	log.Println(string(stdout))
 	log.Println(string(stderr)) // also print debug logs.
 }
@@ -386,6 +391,7 @@ func testStatusEventuallyWorks(t *testing.T, cli string, timeout time.Duration) 
 			log.Printf("Stdout: %s\nStderr: %s", string(stdout), string(stderr))
 			return false
 		}
+		// TODO: all this logging here is duplicated unnecessarily.
 
 		log.Println(string(stdout))
 		return true
@@ -492,6 +498,7 @@ func runCommandWithSeparateOutputs(cmd *exec.Cmd) (stdout, stderr []byte, err er
 	go continuouslyPrintOutput(stdoutIn, "stdout")
 	go continuouslyPrintOutput(stderrIn, "stderr")
 
+	// TODO: according to the docs, it is "incorrect to call Wait before all reads from the pipe have completed."
 	if err = cmd.Wait(); err != nil {
 		err = fmt.Errorf("wait for command to finish: %w", err)
 	}
